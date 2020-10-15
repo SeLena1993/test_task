@@ -1,68 +1,76 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Тестовое задание frontend
+Необходимо разработать SPA, выполняющее следующие функции:
+Вход с использованием логина и пароля
+Подписка и отображение событий с WebSocket сервера
 
-## Available Scripts
+Пример https://work.vint-x.net Логин и пароль: test/test
+Примечание: данный пример - не эталонный проект, а демонстрация работы сервера.  
+Описание страниц
+Приложение состоит из двух страниц: страница входа и страница данных.
+Страница входа
+На странице входа располагаются поля ввода логина и пароля. В случае успешного входа отобразить следующую страницу, если же сервер вернет ошибку, вывести ее (поле “description”).
 
-In the project directory, you can run:
+Для входа используется следующий ендпоинт:
 
-### `npm start`
+URL: https://work.vint-x.net/api/login
+Method: Post
+Body: {“username”: “test”, “password”: ”test”}
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+В случае успеха возвращает следующий ответ:
+Header: x-test-app-jwt-token  - это поле содержит JWT, который необходимо прикрепить к следующим запросам
+Body: {“status”: “OK”}
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+В случае ошибки возвращается  HTTP код этой ошибки и описание в Body:
+{“code”: “”, “description”: “”}
+	
+Варианты ошибок:
+400 BadRequest - выдается в случае неверных данных
+401 Unauthorized - выдается в случае, если логин и пароль не подходят
+500 InternalServerError - внутренняя ошибка сервера
 
-### `npm test`
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Страница данных
+После успешного входа пользователь попадает на страницу данных. На этой странице отображается статус соединения с WS сервером (Connected/Disconnected) и значение текущего времени сервера (в формате dd.MM.yy HH:mm:ss), получаемого по WS. Приложение обращается к серверу с использованием токена и получает ссылку с OTP на WebSocket сервер. Далее по этой ссылке подключается к WS серверу и получает текущее время сервера с периодичностью 2 раза в секунду. В случае обрыва соединения (сервер периодически будет рвать соединение) необходимо заново получить новую ссылку на WS сервер и подключиться повторно. 
 
-### `npm run build`
+Описание ендпоинтов:
+URL: https://work.vint-x.net/api/subscribe 
+Method: Get
+Header: x-test-app-jwt-token - токен, который мы получаем после входа
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+В случае успеха возвращает следующий ответ:
+{“url”: “wss://servername/websocket/{{otp}}”}
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+Варианты ошибок:
+400 BadRequest - выдается в случае отсутствия токена
+401 Unauthorized - выдается в случае, если токен протух или не валидный
+500 InternalServerError - внутренняя ошибка сервера
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-### `npm run eject`
+Описание WebSocket сервера:
+URL: выдает сервер после обращения к эндпоинту выше
+Формат сообщений: {“server_time”: unix_time} 
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+Периодически сервер будет разрывать соединение как корректно, так и резко, без предупреждения. Нужно корректно отлавливать разрывы соединения и переподключаться.  
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+При подключении в WS серверу возможные ошибки:
+401 Unauthorized - выдается в случае, если OTP использовался ранее/протух или не валидный, в этом случае кидаем пользователя на страницу входа
+404 NotFound - выдается в случае ошибки в адресе
+500 InternalServerError - внутренняя ошибка сервера
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+Дополнительно
+Плюсом будет, если:
+при попытке входа, если будет возвращена ошибка, не связанная с проблемой доступа (отличная от 400/401), сделать три попытки, прежде, чем выдать сообщение об ошибке. Примечание: сервер нарочно, примерно с 30% вероятностью генерирует ошибку (500 FakeError);
+уделить внимание внешнему виду приложения (UI/UX);
+стараться писать код приближенный к “боевому”, чтобы можно было оценить подходы;
+в случае рефреша страницы, если ранее пользователь уже вошел, окна входа не будет, а сразу будет отображаться страница с данными. На странице данных воткнуть кнопку выхода;
+приложение будет стабильно работать во всех современных браузерах (Edge/Chrome/Firefox/Safari), в т.ч. и на смартфонах (width>=320px);
+следить, чтобы после сборки не было лишнего мусора.
+Список сокращений
+SPA - single page application
+JWT - JSON Web Token
+WS - WebSocket
+OTP - one-time password
+UX - user experience
+UI - user interface
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
 
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
-
-### Analyzing the Bundle Size
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
-
-### Making a Progressive Web App
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
-
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `npm run build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
