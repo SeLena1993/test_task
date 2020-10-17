@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 
 const HomeTimer = (props) => {
 
     return (
         <div>
-            {props.isSuccess ? 
+            {props.isSuccess ?
                 <h3>{props.dateTime}</h3>
                 :
                 <div className="spinner-border text-primary" role="status">
@@ -12,10 +12,10 @@ const HomeTimer = (props) => {
                 </div>
             }
             <div>
-                <button onClick = {props.logout} className="btn btn-primary" type="submit">
+                <button onClick={props.logout} className="btn btn-primary" type="submit">
                     Logout
                 </button>
-            </div>    
+            </div>
         </div>
     )
 }

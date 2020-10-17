@@ -1,8 +1,8 @@
-import {instance} from './instance'
+import { instance } from './instance'
 
 export const LoginAPI = {
-    login(username, password){
-        return instance.post('/login', {username, password})
+    login(username, password) {
+        return instance.post('/login', { username, password })
     }
 }
 

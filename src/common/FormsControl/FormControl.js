@@ -1,17 +1,17 @@
 import React from 'react'
 
-export const InputField = ({input, meta, ...props}) => {
+export const InputField = ({ input, meta, ...props }) => {
     const requiredError = meta.error && meta.touched
-    return(
+    return (
         <>
             <input className={requiredError ? "form-control is-invalid" : "form-control"}
                 {...input}
-                {...props}  
+                {...props}
             />
             {requiredError &&
                 <span className="text-danger">
                     {meta.error}
-                </span> }
-        </>   
+                </span>}
+        </>
     )
 }

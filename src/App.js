@@ -1,27 +1,27 @@
 import React from 'react';
 import { Switch, Route, Redirect } from "react-router-dom";
 import LoginContainer from './components/Login/LoginContainer';
-import {connect} from 'react-redux';
+import { connect } from 'react-redux';
 import HomeContainer from './components/Home/HomeContainer'
-import  './App.css'
+import './App.css'
 
 const App = (props) => {
   return (
-    <div className="d-flex justify-content-center align-items-center" style={{height: "100vh"}}>
-      <div className = "content-wrapper">
+    <div className="d-flex justify-content-center align-items-center" style={{ height: "100vh" }}>
+      <div className="content-wrapper">
         <Switch>
-          <Route path={'/home'} 
-              render={ () => 
-                <HomeContainer/> }
+          <Route path={'/home'}
+            render={() =>
+              <HomeContainer />}
           />
-          <Route exact path={['/login', '/']} 
-              render={ () => 
-                  props.isAuth ?
-                    (<Redirect to = {'/home'}/> )
-                      :
-                    (<LoginContainer/> )}
+          <Route exact path={['/login', '/']}
+            render={() =>
+              props.isAuth ?
+                (<Redirect to={'/home'} />)
+                :
+                (<LoginContainer />)}
           />
-      </Switch>
+        </Switch>
       </div>
     </div>
   )
